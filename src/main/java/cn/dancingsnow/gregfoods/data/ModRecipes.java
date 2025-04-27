@@ -61,5 +61,63 @@ public class ModRecipes {
             .EUt(GTValues.VA[GTValues.LV])
             .duration(64 * 20)
             .save(provider);
+
+        ModRecipeTypes.ANIMAL_PROCESS.recipeBuilder(GregFoods.id("cow"))
+            .notConsumable(Items.COW_SPAWN_EGG)
+            .outputItems(new ItemStack(Items.COOKED_BEEF, 16))
+            .EUt(GTValues.VA[GTValues.LV])
+            .duration(64 * 20)
+            .save(provider);
+
+        ModRecipeTypes.ANIMAL_PROCESS.recipeBuilder(GregFoods.id("pig"))
+            .notConsumable(Items.PIG_SPAWN_EGG)
+            .outputItems(new ItemStack(Items.COOKED_PORKCHOP, 16))
+            .EUt(GTValues.VA[GTValues.LV])
+            .duration(64 * 20)
+            .save(provider);
+
+        ModRecipeTypes.ANIMAL_PROCESS.recipeBuilder(GregFoods.id("sheep"))
+            .notConsumable(Items.SHEEP_SPAWN_EGG)
+            .outputItems(new ItemStack(Items.COOKED_MUTTON, 16))
+            .EUt(GTValues.VA[GTValues.LV])
+            .duration(64 * 20)
+            .save(provider);
+
+        ModRecipeTypes.ANIMAL_PROCESS.recipeBuilder(GregFoods.id("cod"))
+            .notConsumable(Items.COD_SPAWN_EGG)
+            .outputItems(new ItemStack(Items.COOKED_COD, 16))
+            .EUt(GTValues.VA[GTValues.LV])
+            .duration(64 * 20)
+            .save(provider);
+
+        ModRecipeTypes.ANIMAL_PROCESS.recipeBuilder(GregFoods.id("rabbit"))
+            .notConsumable(Items.RABBIT_SPAWN_EGG)
+            .outputItems(new ItemStack(Items.COOKED_RABBIT, 16))
+            .EUt(GTValues.VA[GTValues.LV])
+            .duration(64 * 20)
+            .save(provider);
+
+        ModRecipeTypes.ANIMAL_PROCESS.recipeBuilder(GregFoods.id("salmon"))
+            .notConsumable(Items.SALMON_SPAWN_EGG)
+            .outputItems(new ItemStack(Items.COOKED_SALMON, 16))
+            .EUt(GTValues.VA[GTValues.LV])
+            .duration(64 * 20)
+            .save(provider);
+
+        ModRecipeTypes.ANIMAL_PROCESS.recipeBuilder(GregFoods.id("zombie"))
+            .notConsumable(Items.ZOMBIE_SPAWN_EGG)
+            .chancedOutput(new ItemStack(Items.BAKED_POTATO, 16), 200, 100)
+            .chancedOutput(new ItemStack(Items.CARROT, 16), 200, 100)
+            .EUt(GTValues.VA[GTValues.LV])
+            .duration(64 * 20)
+            .save(provider);
+
+        ModRecipeTypes.ANIMAL_PROCESS.recipeBuilder(GregFoods.id("villager"))
+            .notConsumable(Items.VILLAGER_SPAWN_EGG)
+            .chancedOutput(new ItemStack(Items.GOLDEN_CARROT, 16), 10, 10)
+            .chancedOutput(new ItemStack(Items.BREAD, 16), 100, 20)
+            .EUt(GTValues.VA[GTValues.IV])
+            .duration(128 * 20)
+            .save(provider);
     }
 }

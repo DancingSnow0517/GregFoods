@@ -1,6 +1,7 @@
 package cn.dancingsnow.gregfoods.foundation;
 
 import cn.dancingsnow.gregfoods.GregFoods;
+import cn.dancingsnow.gregfoods.client.renderer.AnimalProcessorRenderer;
 import com.gregtechceu.gtceu.GTCEu;
 import com.gregtechceu.gtceu.api.data.RotationState;
 import com.gregtechceu.gtceu.api.machine.MultiblockMachineDefinition;
@@ -18,8 +19,8 @@ import static cn.dancingsnow.gregfoods.GregFoods.REGISTRATE;
 public class ModMachines {
     public static final MultiblockMachineDefinition ANIMAL_PROCESS = REGISTRATE
         .multiblock("animal_process", CoilWorkableElectricMultiblockMachine::new)
-        .tooltips(Component.translatable("block.gregfoods.animal_process.desc.0"))
-        .rotationState(RotationState.ALL)
+        .tooltips(Component.translatable("block.gregfoods.animal_process.desc.0").withStyle(ChatFormatting.GRAY))
+        .rotationState(RotationState.NON_Y_AXIS)
         .recipeType(ModRecipeTypes.ANIMAL_PROCESS)
         .recipeModifiers(GTRecipeModifiers.PARALLEL_HATCH, ModRecipeModifiers::animalProcessOverclock)
         .appearanceBlock(ModBlocks.FARM_CASING)
@@ -39,7 +40,8 @@ public class ModMachines {
             .where('#', Predicates.air())
             .build()
         )
-        .workableCasingRenderer(GregFoods.id("block/casings/farm_casing"), GTCEu.id("block/multiblock/gcym/large_assembler"))
+        .renderer(() -> new AnimalProcessorRenderer(GregFoods.id("block/casings/farm_casing"), GTCEu.id("block/multiblock/gcym/large_assembler")))
+        .hasTESR(true)
         .additionalDisplay(((controller, components) -> {
             if (controller instanceof CoilWorkableElectricMultiblockMachine coilMachine && controller.isFormed()) {
                 components.add(Component.translatable(

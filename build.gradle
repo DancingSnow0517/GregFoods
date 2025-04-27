@@ -41,6 +41,9 @@ repositories {
         name = "Jared's Maven"
         url = "https://maven.blamejared.com/"
     }
+    maven {
+        url "https://cursemaven.com"
+    }
 }
 
 
@@ -49,7 +52,7 @@ dependencies {
     modImplementation("com.lowdragmc.ldlib:ldlib-forge-1.20.1:1.0.39") { transitive = false }
     modImplementation("com.gregtechceu.gtceu:gtceu-1.20.1:1.6.4")
     modImplementation("dev.toma.configuration:configuration-forge-1.20.1:2.2.0")
-
+    modRuntimeOnly("curse.maven:jade-324717:6271651")
     modRuntimeOnly("mezz.jei:jei-1.20.1-forge:15.20.0.105")
 }
 
@@ -148,7 +151,6 @@ obfuscation {
 }
 
 // Uncomment the lines below if you wish to configure mixin. The mixin file should be named modid.mixins.json.
-/*
 mixin {
     add sourceSets.main, "${mod_id}.refmap.json"
     config "${mod_id}.mixins.json"
@@ -163,7 +165,6 @@ jar {
             "MixinConfigs": "${mod_id}.mixins.json"
     ])
 }
-*/
 
 // This block of code expands all declared replace properties in the specified resource targets.
 // A missing property will result in an error. Properties are expanded using ${} Groovy notation.
