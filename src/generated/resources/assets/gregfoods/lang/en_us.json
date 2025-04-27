@@ -1,0 +1,6 @@
+{
+  "block.gregfoods.animal_process": "Animal Process",
+  "block.gregfoods.farm_casing": "Farm Casing",
+  "gregfoods.animal_process": "Animal Process",
+  "gregfoods.multiblock.animal_process.efficiency": "Efficiency: %s"
+}
