@@ -1,8 +1,0 @@
-{
-  "package": "cn.dancingsnow.gregfoods.mixins",
-  "compatibilityLevel": "JAVA_17",
-  "minVersion": "0.8",
-  "client": [
-    "LivingEntityAccessor"
-  ]
-}

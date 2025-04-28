@@ -1,6 +1,5 @@
 package cn.dancingsnow.gregfoods.client.renderer;
 
-import cn.dancingsnow.gregfoods.mixins.LivingEntityAccessor;
 import com.gregtechceu.gtceu.api.blockentity.MetaMachineBlockEntity;
 import com.gregtechceu.gtceu.api.capability.recipe.ItemRecipeCapability;
 import com.gregtechceu.gtceu.api.machine.multiblock.CoilWorkableElectricMultiblockMachine;
@@ -17,6 +16,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -24,6 +24,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -34,6 +35,7 @@ import java.util.Map;
 
 public class AnimalProcessorRenderer extends WorkableCasingMachineRenderer {
     public static final MethodHandle MT_setActualRelativeOffset;
+    public static final MethodHandle MT_getHurtSound;
 
     static {
         try {
@@ -48,6 +50,12 @@ public class AnimalProcessorRenderer extends WorkableCasingMachineRenderer {
             );
             mt.setAccessible(true);
             MT_setActualRelativeOffset = MethodHandles.lookup().unreflect(mt);
+            Method m_getHurtSound = LivingEntity.class.getDeclaredMethod(
+                FMLEnvironment.production ? "m_7975_" : "getHurtSound",
+                DamageSource.class
+            );
+            m_getHurtSound.setAccessible(true);
+            MT_getHurtSound = MethodHandles.lookup().unreflect(m_getHurtSound);
         } catch (NoSuchMethodException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
@@ -90,7 +98,12 @@ public class AnimalProcessorRenderer extends WorkableCasingMachineRenderer {
                     ItemStack[] items = ingredient.getItems();
                     for (ItemStack item : items) {
                         if (item.getItem() instanceof SpawnEggItem spawnEggItem) {
-                            renderEntity(blockEntity, poseStack, buffer, machine, item, spawnEggItem);
+                            try {
+                                renderEntity(blockEntity, poseStack, buffer, machine, item, spawnEggItem);
+                            }catch (Throwable e) {
+                                e.printStackTrace();
+                                return;
+                            }
                         }
                     }
                 }
@@ -98,7 +111,14 @@ public class AnimalProcessorRenderer extends WorkableCasingMachineRenderer {
         }
     }
 
-    private void renderEntity(BlockEntity blockEntity, PoseStack poseStack, MultiBufferSource buffer, CoilWorkableElectricMultiblockMachine machine, ItemStack item, SpawnEggItem spawnEggItem) {
+    private void renderEntity(
+        BlockEntity blockEntity,
+        PoseStack poseStack,
+        MultiBufferSource buffer,
+        CoilWorkableElectricMultiblockMachine machine,
+        ItemStack item,
+        SpawnEggItem spawnEggItem
+    ) throws Throwable {
         EntityType<?> ty = spawnEggItem.getType(item.getTag());
         Entity entity;
         if (!entityCacheMap.containsKey(ty)) {
@@ -143,8 +163,10 @@ public class AnimalProcessorRenderer extends WorkableCasingMachineRenderer {
         } else {
             entity.animateHurt(0);
             if (!entity.hurtMarked && !machine.isMuffled() && !Minecraft.getInstance().isPaused()) {
-                SoundEvent soundEvent = ((LivingEntityAccessor) livingEntity)
-                    .invokeGetHurtSound(livingEntity.level().damageSources().hotFloor());
+                SoundEvent soundEvent = (SoundEvent) MT_getHurtSound.invoke(
+                    livingEntity,
+                    livingEntity.level().damageSources().hotFloor()
+                );
                 livingEntity.level().playSound(
                     Minecraft.getInstance().player,
                     machine.getPos().getX(),
