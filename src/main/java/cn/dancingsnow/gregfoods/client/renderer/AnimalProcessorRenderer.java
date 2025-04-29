@@ -3,7 +3,7 @@ package cn.dancingsnow.gregfoods.client.renderer;
 import com.gregtechceu.gtceu.api.blockentity.MetaMachineBlockEntity;
 import com.gregtechceu.gtceu.api.capability.recipe.ItemRecipeCapability;
 import com.gregtechceu.gtceu.api.machine.multiblock.CoilWorkableElectricMultiblockMachine;
-import com.gregtechceu.gtceu.api.pattern.BlockPattern;
+import com.gregtechceu.gtceu.api.pattern.util.RelativeDirection;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
 import com.gregtechceu.gtceu.api.recipe.content.Content;
 import com.gregtechceu.gtceu.client.renderer.machine.WorkableCasingMachineRenderer;
@@ -24,6 +24,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import java.lang.invoke.MethodHandle;
@@ -34,22 +35,10 @@ import java.util.List;
 import java.util.Map;
 
 public class AnimalProcessorRenderer extends WorkableCasingMachineRenderer {
-    public static final MethodHandle MT_setActualRelativeOffset;
     public static final MethodHandle MT_getHurtSound;
 
     static {
         try {
-            Method mt = BlockPattern.class.getDeclaredMethod(
-                "setActualRelativeOffset",
-                int.class,
-                int.class,
-                int.class,
-                Direction.class,
-                Direction.class,
-                boolean.class
-            );
-            mt.setAccessible(true);
-            MT_setActualRelativeOffset = MethodHandles.lookup().unreflect(mt);
             Method m_getHurtSound = LivingEntity.class.getDeclaredMethod(
                 FMLEnvironment.production ? "m_7975_" : "getHurtSound",
                 DamageSource.class
@@ -79,14 +68,7 @@ public class AnimalProcessorRenderer extends WorkableCasingMachineRenderer {
     }
 
     @Override
-    public void render(
-        BlockEntity blockEntity,
-        float partialTicks,
-        PoseStack poseStack,
-        MultiBufferSource buffer,
-        int combinedLight,
-        int combinedOverlay
-    ) {
+    public void render(BlockEntity blockEntity, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
         if (blockEntity instanceof MetaMachineBlockEntity be) {
             if (be.getMetaMachine() instanceof CoilWorkableElectricMultiblockMachine machine) {
                 GTRecipe recipe = machine.recipeLogic.getLastRecipe();
@@ -100,7 +82,7 @@ public class AnimalProcessorRenderer extends WorkableCasingMachineRenderer {
                         if (item.getItem() instanceof SpawnEggItem spawnEggItem) {
                             try {
                                 renderEntity(blockEntity, poseStack, buffer, machine, item, spawnEggItem);
-                            }catch (Throwable e) {
+                            } catch (Throwable e) {
                                 e.printStackTrace();
                                 return;
                             }
@@ -130,21 +112,42 @@ public class AnimalProcessorRenderer extends WorkableCasingMachineRenderer {
 
         if (!(entity instanceof LivingEntity livingEntity)) return;
         poseStack.pushPose();
-        BlockPos actual;
-        try {
-            actual = (BlockPos) MT_setActualRelativeOffset.invoke(
-                machine.getPattern(),
-                0,
-                1,
-                -1,
-                machine.getFrontFacing(),
-                machine.getUpwardsFacing(),
-                machine.isFlipped()
-            );
-        } catch (Throwable e) {
-            throw new RuntimeException(e);
+
+        Direction front = machine.getFrontFacing();
+        Direction upwards = machine.getUpwardsFacing();
+        boolean flipped = machine.isFlipped();
+
+        Direction relativeBack = RelativeDirection.BACK.getRelativeFacing(front, upwards, flipped);
+        Direction relativeUp = RelativeDirection.UP.getRelativeFacing(front, upwards, flipped);
+
+        BlockPos relativePos = new BlockPos(0, 0, 0).relative(relativeBack).relative(relativeUp);
+        Vec3 relativeCenter = relativePos.getCenter();
+
+
+        switch (relativeUp.getAxis()) {
+            case X:
+                poseStack.translate(
+                    relativeCenter.x + 0.49 * -relativeUp.getAxisDirection().getStep(),
+                    relativeCenter.y,
+                    relativeCenter.z
+                );
+                break;
+            case Y:
+                poseStack.translate(
+                    relativeCenter.x,
+                    relativeCenter.y + 0.49 * -relativeUp.getAxisDirection().getStep(),
+                    relativeCenter.z
+                );
+                break;
+            case Z:
+                poseStack.translate(
+                    relativeCenter.x,
+                    relativeCenter.y,
+                    relativeCenter.z + 0.49 * -relativeUp.getAxisDirection().getStep()
+                );
+                break;
         }
-        poseStack.translate(actual.getX() + 0.5, actual.getY() + 0.01, actual.getZ() + 0.5);
+        poseStack.mulPose(relativeUp.getRotation());
         float bbMax = (float) Math.max(
             entity.getBoundingBox().getXsize(),
             Math.max(
